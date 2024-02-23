@@ -3,4 +3,4 @@
 */share/
 */etc/
 */pyvenv.cfg
-*/--pycache__/
+*/__pycache__/
