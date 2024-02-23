@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>강의평 요약</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+<h2>강의평 상세</h2>
+<div id="count">
+    <p>강의평 개수 : </p>
+</div>
+
+<table id="summaryTable">
+    <tr>
+        <th>항목</th>
+        <th>평균</th>
+        <th>중앙값</th>
+        <th>최소값</th>
+        <th>최대값</th>
+    </tr>
+</table>
+
+<table id="강의평">
+  <tr>
+      <th>닉네임</th>
+      <th>강의평</th>
+      <th>강의만족도</th>
+  </tr>
+</table>
+
+<script>
+function getParameterByName(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+    }
+
+    // 페이지 로드 시 교수명 매개변수를 추출하여 출력하는 예시
+    window.onload = function() {
+        const professorName = getParameterByName('professor');
+        if (professorName) {
+          fetchData(professorName)
+          fetchData2(professorName)
+        } else {
+            console.error('교수명이 지정되지 않았습니다.');
+        }
+    };
+
+
+    function fetchData(professorName) {
+      fetch('http://127.0.0.1:8000/professor_info/'+professorName, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        const summaryTable = document.getElementById('summaryTable');
+        const count = document.getElementById('count');
+        count.textContent = '강의평 개수: ' + data['강의평 개수'];
+        const rows = [
+            ['강의만족도', data['강의만족도 평균'], data['강의만족도 중앙값'], data['강의만족도 최소값'], data['강의만족도 최대값']],
+            ['난이도', data['난이도 평균'], data['난이도 중앙값'], data['난이도 최소값'], data['난이도 최대값']],
+            ['성취감', data['성취감 평균'], data['성취감 중앙값'], data['성취감 최소값'], data['성취감 최대값']],
+            ['학습량', data['학습량 평균'], data['학습량 중앙값'], data['학습량 최소값'], data['학습량 최대값']],
+            ['강의력', data['강의력 평균'], data['강의력 중앙값'], data['강의력 최소값'], data['강의력 최대값']]
+        ];
+
+        rows.forEach(rowData => {
+            const row = summaryTable.insertRow();
+            rowData.forEach((cellData, index) => {
+                const cell = row.insertCell();
+                // 첫 번째 열에만 항목 이름을 넣기
+                if (index === 0) {
+                    cell.textContent = rowData[0];
+                } else {
+                    cell.textContent = parseFloat(cellData).toFixed(2);
+                }
+            });
+        });
+    })
+    .catch(error => console.error('Error fetching data:', error));
+}
+
+    
+    function fetchData2(professorName) {
+        fetch('http://127.0.0.1:8000/professor_repu/'+professorName, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            const table = document.getElementById('강의평');
+            data.forEach(item => {
+                const row = table.insertRow();
+                row.insertCell().textContent = item['유저아이디'];
+                row.insertCell().textContent = item['강의평'];
+                row.insertCell().textContent = parseFloat(item['강의만족도']);
+            });
+        })
+        .catch(error => console.error('Error fetching data:', error));
+    }
+    
+    // 페이지 로드 시 데이터를 가져옴
+    fetchData();
+    fetchData2();
+</script>
+
+</body>
+</html>
